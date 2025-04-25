@@ -1,0 +1,237 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace LibraryManagement
+{
+    // Kelas dasar
+    public class Book
+    {
+        public int ID { get; set; }
+        public string Judul { get; set; }
+        public string Penulis { get; set; }
+        public int TahunTerbit { get; set; }
+        public string Status { get; set; } = "Tersedia";
+
+        public virtual void Display()
+        {
+            Console.WriteLine($"ID: {ID}, Judul: {Judul}, Penulis: {Penulis}, Tahun: {TahunTerbit}, Status: {Status}");
+        }
+    }
+
+    // Kelas turunan untuk inheritance
+    public class BorrowedBook : Book
+    {
+        public string Peminjam { get; set; }
+
+        public override void Display()
+        {
+            base.Display();
+            Console.WriteLine($"Dipinjam oleh: {Peminjam}");
+        }
+    }
+
+    public class Library
+    {
+        public string Nama { get; set; }
+        public string Alamat { get; set; }
+        private List<Book> koleksiBuku = new List<Book>();
+
+        public Library(string nama, string alamat)
+        {
+            Nama = nama;
+            Alamat = alamat;
+        }
+
+        public void TambahBuku(Book buku)
+        {
+            if (koleksiBuku.Any(b => b.ID == buku.ID))
+            {
+                Console.WriteLine("ID buku sudah ada, tidak bisa ditambahkan.");
+            }
+            else
+            {
+                koleksiBuku.Add(buku);
+                Console.WriteLine("Buku berhasil ditambahkan!");
+            }
+            
+        }
+
+        public void TampilkanSemuaBuku()
+        {
+            Console.WriteLine("\nDaftar Buku Perpustakaan:");
+            if (koleksiBuku.Count == 0)
+            {
+                Console.WriteLine("Tidak ada buku di perpustakaan.");
+            }
+            else
+            {
+                foreach (var buku in koleksiBuku)
+                {
+                    buku.Display();
+                }
+            }
+        }
+
+        public void CariBuku()
+        {
+            if (koleksiBuku.Count == 0)
+            {
+                Console.WriteLine("Belim ada buku");
+            }
+            else{
+                TampilkanSemuaBuku();
+            }
+            Console.Write("");
+            Console.Write("Masukkan ID atau Judul: ");
+            string keyword = Console.ReadLine();
+            var hasil = koleksiBuku.Where(b => b.ID.ToString() == keyword || b.Judul.ToLower().Contains(keyword.ToLower())).ToList();
+
+            if (hasil.Any())
+            {
+                Console.WriteLine("\nHasil Pencarian:");
+                foreach (var buku in hasil)
+                {
+                    buku.Display();
+                }
+            }
+            else
+            {
+                Console.WriteLine("Buku tidak ditemukan.");
+            }
+
+        }
+
+        public void UbahBuku()
+        {
+            if (koleksiBuku.Count == 0)
+            {
+                Console.WriteLine("Belim ada buku");
+            }
+            else{
+                TampilkanSemuaBuku();
+            }
+            Console.Write("");
+            Console.Write("Masukkan ID buku yang ingin diubah: ");
+            int id = int.Parse(Console.ReadLine());
+
+            var buku = koleksiBuku.FirstOrDefault(b => b.ID == id);
+            if (buku != null)
+            {
+                Console.Write("Judul baru: "); buku.Judul = Console.ReadLine();
+                Console.Write("Penulis baru: "); buku.Penulis = Console.ReadLine();
+                Console.Write("Tahun Terbit baru: "); buku.TahunTerbit = int.Parse(Console.ReadLine());
+                Console.Write("Status (Tersedia/Dipinjam): "); buku.Status = Console.ReadLine();
+
+                Console.WriteLine("Buku berhasil diperbarui!");
+            }
+            else
+            {
+                Console.WriteLine("Buku tidak ditemukan.");
+            }
+        }
+
+        public void HapusBuku()
+        {
+            if (koleksiBuku.Count == 0)
+            {
+                Console.WriteLine("Belum ada buku");
+            }
+            else{
+                TampilkanSemuaBuku();
+            }
+            Console.Write("");
+            Console.Write("Masukkan ID buku yang ingin dihapus: ");
+            int id = int.Parse(Console.ReadLine());
+
+            var buku = koleksiBuku.FirstOrDefault(b => b.ID == id);
+            if (buku != null)
+            {
+                koleksiBuku.Remove(buku);
+                Console.WriteLine("Buku berhasil dihapus.");
+            }
+            else
+            {
+                Console.WriteLine("Buku tidak ditemukan.");
+            }
+        }
+    }
+
+    class Program
+    {
+        static void Main()
+        {
+            Library perpustakaan = new Library("Perpustakaan Kota", "Jl. Merdeka No.1");
+
+            while (true)
+            {
+                Console.WriteLine("\n=== Menu Manajemen Perpustakaan ===");
+                Console.WriteLine("1. Tambah Buku");
+                Console.WriteLine("2. Tampilkan Semua Buku");
+                Console.WriteLine("3. Cari Buku");
+                Console.WriteLine("4. Ubah Buku");
+                Console.WriteLine("5. Hapus Buku");
+                Console.WriteLine("6. Keluar");
+                Console.Write("Pilih menu (1-6): ");
+                string pilihan = Console.ReadLine();
+
+                switch (pilihan)
+                {
+                    case "1":
+                        Console.Write("ID: ");
+                        int id = int.Parse(Console.ReadLine());
+                        Console.Write("Judul: ");
+                        string judul = Console.ReadLine();
+                        Console.Write("Penulis: ");
+                        string penulis = Console.ReadLine();
+                        Console.Write("Tahun Terbit: ");
+                        int tahun = int.Parse(Console.ReadLine());
+                        Console.Write("Status (Tersedia/Dipinjam): ");
+                        string status = Console.ReadLine();
+
+                        Book buku;
+                        if (status.ToLower() == "dipinjam")
+                        {
+                            Console.Write("Nama Peminjam: ");
+                            string peminjam = Console.ReadLine();
+                            buku = new BorrowedBook { ID = id, Judul = judul, Penulis = penulis, TahunTerbit = tahun, Status = status, Peminjam = peminjam };
+                        }
+                        else
+                        {
+                            buku = new Book { ID = id, Judul = judul, Penulis = penulis, TahunTerbit = tahun, Status = status };
+                        }
+
+                        perpustakaan.TambahBuku(buku);
+                        break;
+
+                    case "2":
+                        perpustakaan.TampilkanSemuaBuku();
+                        break;
+
+                    case "3":
+                        perpustakaan.TampilkanSemuaBuku();
+                        perpustakaan.CariBuku();
+                        break;
+
+                    case "4":
+                        perpustakaan.TampilkanSemuaBuku();
+                        perpustakaan.UbahBuku();
+                        break;
+
+                    case "5":
+                        perpustakaan.TampilkanSemuaBuku();
+                        perpustakaan.HapusBuku();
+                        break;
+
+                    case "6":
+                        Console.WriteLine("Terima kasih telah menggunakan aplikasi.");
+                        return;
+
+                    default:
+                        Console.WriteLine("Pilihan tidak valid.");
+                        break;
+                }
+            }
+        }
+    }
+}
